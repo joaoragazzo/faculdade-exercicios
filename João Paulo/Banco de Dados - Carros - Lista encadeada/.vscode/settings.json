@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.json": "json",
+        "iostream": "cpp",
+        "fstream": "cpp",
+        "xstring": "cpp",
+        "ostream": "cpp",
+        "string": "cpp",
+        "iomanip": "cpp"
+    }
+}
