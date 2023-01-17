@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
@@ -535,6 +536,13 @@ bool travessia(PONT p, int *niv, TIPOCHAVE ch) {
  * 
  */
 int main(int argc, char** argv) {
+    PONT arvoreAVL;
+    bool *mudou;
+    int n;
+    
+    cout << "INICIANDO A ARVORE" << endl;
+    inicializar(&arvoreAVL);
+
 
     return 0;
 }
