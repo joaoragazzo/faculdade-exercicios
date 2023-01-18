@@ -4,8 +4,13 @@
 * g++ -o main.exe main.cpp sum.cpp
 * e, depois, para executar o arquivo, utilizamos:
 * ./main.exe
-*
 */
+
+/**
+ * Para compilar automaticamente no VSCode, é necessário mudar as opções do compilador em .vscode/tasks.json e colocar o 
+ * nome dos "headers" nos paramentros de compilaçã
+ * 
+ */
 
 
 #include <iostream>
