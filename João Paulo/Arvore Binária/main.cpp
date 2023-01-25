@@ -35,7 +35,7 @@ no * inicia_arvore (int valor) {
  * @param valor o valor a ser inserido
  * @return 1 caso foi possível realizar a inserção e 0 caso não tenha sido possível realizar a inserção
 */
-int insere_valor (no * cabeca, int valor) {
+int insere_valor(no * cabeca, int valor) {
     if (cabeca->valor == valor){
         return 0;
     }
@@ -67,23 +67,63 @@ int insere_valor (no * cabeca, int valor) {
     }
 };
 
-no ** encontrar_no(no * no_, int valor) {
-    while(no_->valor != valor && no_->valor != NULL) {
+/**
+ * @brief Função utilizada para encontrar o ponteiro que aponta para o nó com o específico valor
+ * 
+ * @param no_ o primeiro nó de onde vai começar a busca
+ * @param valor o valor a ser buscado
+ * @return um ponteiro que aponta para o ponteiro que aponta para o nó em questão com o valor
+ * FUNCIONANDO!
+ */
+no ** encontrar_no(no ** no_, int valor) {
+    
+    no * noAtual = *&*no_;
+    no ** ponteiro = no_;
 
+    while(noAtual->valor != valor && noAtual != NULL) {
+        if(noAtual->valor < valor) {
+            ponteiro = &noAtual->direita;
+            noAtual = noAtual->direita;
+        }
+
+        else if(noAtual->valor > valor) {
+            ponteiro = &noAtual->esquerda;
+            noAtual = noAtual->esquerda;
+        }
     }
+
+    if(!noAtual) 
+        return NULL;
+
+    return ponteiro;
+
 }
 
-void remover_valor (no ** cabeca, int valor) {
-    no ** excluir = encontrar_no(*&*cabeca, valor);
-    no * tmp = NULL;
+void remover_valor(no ** cabeca, int valor) {
+    no ** pontExcluir = encontrar_no(cabeca, valor);
+    no * noExcluir = *&*pontExcluir;
 
-    if (excluir == NULL) { /*Se excluir == NULL, entao quer dizer que não existe o valor específico na árvore*/ 
+    if (!pontExcluir) { /*Se excluir == NULL, entao quer dizer que não existe o valor específico na árvore*/ 
         return;
     }
 
-    if (excluir->esquerda == NULL ) {
-        
+    if (!noExcluir->esquerda && !noExcluir->direita) {
+        *pontExcluir = NULL;
     }
+
+    if (noExcluir->esquerda == NULL && noExcluir->direita) {
+        *pontExcluir = noExcluir->direita;
+        return;
+    } 
+
+    no * tmp = noExcluir->esquerda;
+    no * tmp_pai = noExcluir;
+    for(; tmp->direita ; tmp_pai = tmp, tmp = tmp->direita);
+    tmp->direita = noExcluir->direita;
+    tmp->esquerda = noExcluir->esquerda;
+    *pontExcluir = tmp;
+    tmp_pai->direita = NULL;
+    
 
 }
 
@@ -95,10 +135,8 @@ int main(void) {
     insere_valor(cabeca, 3);
     insere_valor(cabeca, 7);
     insere_valor(cabeca, 8);
-    insere_valor(cabeca, 6);
-    insere_valor(cabeca, 5);
 
-    remover_valor(&cabeca, 5);
+    remover_valor(&cabeca, 7);
 
 
     return EXIT_SUCCESS;
