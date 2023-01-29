@@ -130,14 +130,4 @@ void remover_valor(no ** cabeca, int valor) {
 
 int main(void) {
 
-    no * cabeca = inicia_arvore(10);
-    insere_valor(cabeca, 20);
-    insere_valor(cabeca, 3);
-    insere_valor(cabeca, 7);
-    insere_valor(cabeca, 8);
-
-    remover_valor(&cabeca, 7);
-
-
-    return EXIT_SUCCESS;
 }
