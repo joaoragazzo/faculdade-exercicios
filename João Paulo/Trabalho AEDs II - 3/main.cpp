@@ -46,11 +46,23 @@ struct veiculo {
     float preco;
 };
 
+/**
+ * Struct que representa o nó da Lista Principal
+ * carro -> Ponteiro que aponta para o carro do nó
+ * proximo -> Ponteiro que aponta para o próximo elemento da lista encadeada
+*/
 struct no_ {
     veiculo * carro;
     no_ * proximo;
 };
 
+/**
+ * Struct que representa o nó de uma árvore binária
+ * placa -> A placa do veículo em que o noArv está representado
+ * no -> o nó em que o noArv está apontando da ListaPrincipal
+ * esquerda -> proxima folha a esquerda da ListaPrincipal
+ * direita -> próxima folha a direita da ListaPrincipal
+*/
 struct noArv {
     string placa;
     no_ * no;
@@ -58,15 +70,28 @@ struct noArv {
     noArv * direita; 
 };
 
+/**
+ * Cabeçalho da árvore
+ * cabeca aponta para o primeiro nó da arvore
+*/
 struct arvore {
     noArv * cabeca;
 };
 
+/**
+ * Cabeçalho da lista principal
+ * primeiro -> aponta para o primeiro nó da lista principal
+ * ultimo -> aponta para o último nó da lista principal
+*/
 struct cabecalho {
     no_ * primeiro;
     no_ * ultimo;
 };
 
+/**
+ * Inicia a lista principal
+ * @return A lista principal
+*/
 cabecalho * inicia_lista(void) {
     cabecalho * tmp = new cabecalho;
     tmp->primeiro = NULL;
@@ -75,7 +100,109 @@ cabecalho * inicia_lista(void) {
     return tmp;
 }
 
-int remover_veiculo(cabecalho * listaPrincipal, arvore * AVL, arvore * binaria, string placa) {
+/**
+ * Inicia uma árvore binária
+ * @return A árvore binária
+*/
+arvore * inicia_arvore(void) {
+    arvore * tmp = new arvore;
+    tmp->cabeca = NULL;
+    return tmp;
+}
+
+/**
+ * Procura um nó em uma árvore binária
+ * @param cabeca O endereço do primeiro ponteiro que aponta para o primeiro nó da árvore
+ * @param placa A placa a ser procurada na árvore binária
+ * @returns Um ponteiro que aponta para o ponteiro que aponta para o nó da placa
+ * @returns NULL, caso não seja possível encontrar o nó
+*/
+noArv ** encontrar_no(noArv ** cabeca, string placa) {
+    noArv * noAtual = *&*cabeca;
+    noArv ** ponteiro = cabeca;
+
+    while(noAtual->placa != placa) {
+
+        if(noAtual->placa < placa) {
+            ponteiro = &noAtual->direita;
+            noAtual = noAtual->direita;
+
+        } else if (noAtual->placa > placa) {
+            ponteiro = &noAtual->esquerda;
+            noAtual = noAtual->esquerda;
+        }
+
+        if(!noAtual) {
+            return NULL;
+        }
+    }
+
+    /**
+     * Observação: Ao chamar a função, não tentar usar o *&* antes de checar 
+     * se o ponteiro que retorna ser diferente de NULL. Caso contrário, poderá
+     * dar algum tipo de falha na segmentação. 
+    */
+
+
+    return ponteiro;
+}
+
+/**
+ * Remove um nó da árvore binária
+ * @param cabeca O endereço do primeiro ponteiro que aponta para o primeiro nó da árvore
+ * @param placa A placa a ser procurada na árvore binária
+ * @returns 1 caso seja possível realizar a remoção
+ * @returns 0 caso não seja possível realizar a remoção
+*/
+int remover_arv_binaria(noArv ** cabeca, string placa) {
+    
+    noArv ** pontExcluir = encontrar_no(cabeca, placa);
+
+    if (!pontExcluir) { /* Caso pontExcluir == NULL, então quer dizer que não foi encontrado */
+        return 0;
+    }
+    
+    noArv * noExcluir = *&*pontExcluir;
+
+    if (!noExcluir->esquerda && !noExcluir->direita) { /* Caso noExcluir seja o último da árvore */
+        *pontExcluir = NULL;
+        delete noExcluir;
+        return 1;
+    }
+
+    if (!noExcluir->esquerda && noExcluir->direita) {
+        *pontExcluir = noExcluir->direita;
+        delete noExcluir;
+        return 1;
+    }
+
+    noArv * tmp = noExcluir->esquerda;
+    noArv * tmp_pai = noExcluir;
+
+    while(tmp->direita) {
+        tmp_pai = tmp;
+        tmp = tmp->direita;
+    }
+
+    tmp->direita = noExcluir->direita;
+    tmp->esquerda = noExcluir->esquerda;
+    tmp_pai->direita = NULL;
+    *pontExcluir = tmp;
+
+
+    return 1;
+}
+
+/**
+ * Remove um veículo da lista principal, da árvore AVL e da árvore binária simultâneamente
+ * @param listaPrincipal a ListaPrincipal de onde será removido o vepiculo
+ * @param avl a árvore binária AVL de onde será removido o veículo
+ * @param binaria a árvore binária de busca de onde será removido o veículo
+ * @param placa a placa do veículo que será removido das estruturas
+ * @returns 1 caso seja possível realizar a remoção
+ * @returns 0 caso não seja possível realizar a remoção
+*/
+int remover_veiculo(cabecalho * listaPrincipal, arvore ** avl, arvore ** binaria, string placa) {
     no_ * atual = listaPrincipal->primeiro;
     no_ * anterior = NULL;
 
@@ -106,12 +233,111 @@ int remover_veiculo(cabecalho * listaPrincipal, arvore * AVL, arvore * binaria, 
     return 1;
 }
 
-int relatorio(cabecalho * listaPrincipal) {
+/**
+ * Insere um novo nó na árvore binária
+ * @param folha a primeira folha da árvore binária de onde será inserido o novo nó
+ * @param no o nó que a struct da folha irá apontar
+ * @return 1 caso seja possível realizar a inserção
+ * @return 0 caso não seja possível realizar a inserção
+*/
+int inserir_arv_binaria(noArv * folha, no_ * no) {
+    if (folha->placa == no->carro->placa) {
+        return 0;
+    }
+
+    if (folha->placa > no->carro->placa) {
+        if (!folha->esquerda) {
+            noArv * novoNo = new noArv;
+            folha->esquerda = novoNo;
+            novoNo->esquerda = NULL;
+            novoNo->direita = NULL;
+            novoNo->placa = no->carro->placa;
+            novoNo->no = no;
+            return 1;
+        }
+
+        return inserir_arv_binaria(folha->esquerda, no);
+    }
+
+    if (folha->placa < no->carro->placa) {
+        if (!folha->direita) {
+            noArv * novoNo = new noArv;
+            folha->direita = novoNo;
+            novoNo->esquerda = NULL;
+            novoNo->direita = NULL;
+            novoNo->placa = no->carro->placa;
+            novoNo->no = no;
+            return 1;
+        }
+
+        return inserir_arv_binaria(folha->direita, no);
+    }
+}
+
+/**
+ * Insere um veículo na listaPrincipal, na árvore binária AVL e na arvore binária de busca simultâneamente
+ * @param listaPrincipal a lista principal onde será inserido o novo veículo
+ * @param avl a árvore binária AVL onde será inserido o novo veículo
+ * @param binaria a árvore binária de busca onde será inserido o novo véiculo
+ * @param carro o novo carro que será inserido nas estruturas
+*/
+int inserir_veiculo(cabecalho * listaPrincipal, arvore * avl, arvore * binaria, veiculo * carro) {
+
+    no_ * novoNo = new no_; /* O novo nó que será inserido na listaPrincipal*/
+    novoNo->carro = carro;
+    novoNo->proximo = NULL;
+
+    if (!listaPrincipal->primeiro) {
+        listaPrincipal->primeiro = novoNo;
+        listaPrincipal->ultimo = novoNo;
+    } else {
+        listaPrincipal->ultimo->proximo = novoNo;
+        listaPrincipal->ultimo = novoNo;
+    }
+
+    if (1 /* Condição de filtro a ser implementada para arvore binária*/) {
+        if (!binaria->cabeca) {
+            noArv * novaFolha = new noArv;
+            binaria->cabeca = novaFolha;
+            novaFolha->direita = NULL;
+            novaFolha->esquerda = NULL;
+            novaFolha->placa = carro->placa;
+            novaFolha->no = novoNo;
+        } else {
+            inserir_arv_binaria(binaria->cabeca, novoNo);
+        } 
+    }
+
+
+
+
+}
+
+/**
+ * Exibe uma árvore binária
+ * @param folha A primeira folha da árvore binária a qual deseja ser inserida
+*/
+void exibirArvore(noArv * folha) {
+    if (!folha) {
+        return;
+    }
+    cout << "\"" << folha->placa << "\"";
+    cout << "(";
+    exibirArvore(folha->esquerda);
+    exibirArvore(folha->direita);
+    cout << ")";
+}
+
+/**
+ * Exibe o relatório da lista principal
+ * @param listaPrincipal o cabeçalho da lista principal que será inserida.
+*/
+void relatorio(cabecalho * listaPrincipal) {
     no_ * atual = listaPrincipal->primeiro;
 
     if (!atual) {
         cout << "A lista principal está vazia. Impossível imprimir o relatório." << endl;
-        return 0;
+        return;
     }
 
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
@@ -157,7 +383,8 @@ int main(void) {
 
     ifstream bancoDeDados("DB_Veiculos");
     cabecalho * listaPrincipal = inicia_lista();
-    arvore * AVL;
+    arvore * avl = inicia_arvore();
+    arvore * arvoreBinaria = inicia_arvore();
 
     if (bancoDeDados.is_open()) {
         while (!bancoDeDados.eof()) {
@@ -176,23 +403,9 @@ int main(void) {
             bancoDeDados >> carro->placa;
             bancoDeDados >> carro->preco;
 
-            no_ * tmp = new no_;
-            tmp->carro = carro;
-            tmp->proximo = NULL;
-
-            if (!listaPrincipal->primeiro) {
-                listaPrincipal->primeiro = tmp;
-                listaPrincipal->ultimo = tmp;
-            } else {
-                listaPrincipal->ultimo->proximo = tmp;
-                listaPrincipal->ultimo = tmp;
-            }
+            inserir_veiculo(listaPrincipal, avl, arvoreBinaria, carro);
         }
 
-    }
-
-
-    remover_veiculo(listaPrincipal, NULL, NULL, "MAN7774");
-    relatorio(listaPrincipal);
+    } 
 
 }
