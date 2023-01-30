@@ -41,7 +41,7 @@ int insere_valor(no * cabeca, int valor) {
     }
 
     if (cabeca->valor > valor) { /* tem que ir para a esquerda */
-        if (cabeca->esquerda == NULL) {
+        if (!cabeca->esquerda) {
             no * tmp = new no;
             cabeca->esquerda = tmp;
             tmp->esquerda = NULL;
@@ -54,7 +54,7 @@ int insere_valor(no * cabeca, int valor) {
     }
 
     if (cabeca->valor < valor) {
-        if (cabeca->direita == NULL) {
+        if (!cabeca->direita) {
             no * tmp = new no;
             cabeca->direita = tmp;
             tmp->esquerda = NULL;
@@ -80,7 +80,7 @@ no ** encontrar_no(no ** no_, int valor) {
     no * noAtual = *&*no_;
     no ** ponteiro = no_;
 
-    while(noAtual->valor != valor && noAtual != NULL) {
+    while(noAtual->valor != valor && noAtual) {
         if(noAtual->valor < valor) {
             ponteiro = &noAtual->direita;
             noAtual = noAtual->direita;
