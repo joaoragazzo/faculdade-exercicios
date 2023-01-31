@@ -91,7 +91,8 @@ struct noArvAVL {
  * cabeca aponta para o primeiro nó da arvore
 */
 struct arvore {
-    noArv * cabeca;
+    noArv * arvore_binaria;
+    noArvAVL * arvore_avl;
 };
 
 /**
@@ -122,7 +123,8 @@ cabecalho * inicia_lista(void) {
 */
 arvore * inicia_arvore(void) {
     arvore * tmp = new arvore;
-    tmp->cabeca = NULL;
+    tmp->arvore_binaria = NULL;
+    tmp->arvore_avl = NULL;
     return tmp;
 }
 
@@ -297,7 +299,7 @@ int inserir_arv_binaria(noArv * folha, no_ * no) {
  * @param binaria a árvore binária de busca onde será inserido o novo véiculo
  * @param carro o novo carro que será inserido nas estruturas
 */
-int inserir_veiculo(cabecalho * listaPrincipal, arvore * avl, arvore * binaria, veiculo * carro) {
+int inserir_veiculo(cabecalho * listaPrincipal, arvore * avl, arvore * arvores, veiculo * carro) {
 
     no_ * novoNo = new no_; /* O novo nó que será inserido na listaPrincipal*/
     novoNo->carro = carro;
@@ -312,16 +314,30 @@ int inserir_veiculo(cabecalho * listaPrincipal, arvore * avl, arvore * binaria, 
     }
 
     if (1 /* Condição de filtro a ser implementada para arvore binária*/) {
-        if (!binaria->cabeca) {
+        if (!arvores->arvore_binaria) {
             noArv * novaFolha = new noArv;
-            binaria->cabeca = novaFolha;
+            arvores->arvore_binaria = novaFolha;
             novaFolha->direita = NULL;
             novaFolha->esquerda = NULL;
             novaFolha->placa = carro->placa;
             novaFolha->no = novoNo;
         } else {
-            inserir_arv_binaria(binaria->cabeca, novoNo);
+            inserir_arv_binaria(arvores->arvore_binaria, novoNo);
         } 
+    }
+
+    if(1 /* Condição de filtro a ser implementado para árvore binária */) {
+        if(!arvores->arvore_avl) {
+            noArvAVL * novaFolha = new noArvAVL;
+            arvores->arvore_avl = novaFolha;
+            novaFolha->bal = 0;
+            novaFolha->direita = NULL;
+            novaFolha->esquerda = NULL;
+            novaFolha->placa = carro->placa;
+            novaFolha->no = novoNo;
+        } else {
+            
+        }
     }
 
 
@@ -435,13 +451,11 @@ void relatorio_preordem(arvore * arvore_) {
     cout << "|  PLACA  |      MODELO       |    MARCA   |   TIPO  |  ANO |   KM   | POT |  COMB  |   CAMBIO   |   DIREÇAO  |    COR   | PT | PREÇO  |" << endl;
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
 
-    relatorio_preordem_carros(arvore_->cabeca);
+    relatorio_preordem_carros(arvore_->arvore_binaria);
 
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+\033[0m" << endl;
 
 }
-
-
 
 int main(void) {
 

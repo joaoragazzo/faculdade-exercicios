@@ -119,8 +119,13 @@ void remover_valor(no ** cabeca, int valor) {
     no * tmp = noExcluir->esquerda;
     no * tmp_pai = noExcluir;
     for(; tmp->direita ; tmp_pai = tmp, tmp = tmp->direita);
-    tmp->direita = noExcluir->direita;
-    tmp->esquerda = noExcluir->esquerda;
+    
+    if (noExcluir->direita != tmp) 
+        tmp->direita = noExcluir->direita;
+
+    if (noExcluir->esquerda != tmp)
+        tmp->esquerda = noExcluir->esquerda;
+    
     *pontExcluir = tmp;
     tmp_pai->direita = NULL;
     
