@@ -71,6 +71,22 @@ struct noArv {
 };
 
 /**
+ * Struct que representa o nó de uma árvore AVL, com o coeficiente de balanceamento
+ * placa -> A placa ao qual o nó está apontando
+ * no -> O nó da lista principal representado por uma folha da árvore
+ * esquerda -> a próxima folha a esquerda
+ * direita -> a próxima folha a direita
+ * bal -> coeficiente de balanceamento da árvore AVL
+*/
+struct noArvAVL {
+    string placa;
+    no_ * no;
+    noArvAVL * esquerda;
+    noArvAVL * direita;
+    int bal;
+};
+
+/**
  * Cabeçalho da árvore
  * cabeca aponta para o primeiro nó da arvore
 */
@@ -371,6 +387,62 @@ void relatorio(cabecalho * listaPrincipal) {
 
 }
 
+/**
+ * Imprime a lista de todos os carros de uma árvore em pré-ordem sem o cabecalho das informações
+ * @param cabeca o primeiro nó da árvore binária
+*/
+void relatorio_preordem_carros(noArv * cabeca) {
+    
+    if (!cabeca) {
+        cout << "Impossível mostrar o relatório. A árvore está vazia" << endl;
+        return;
+    }
+
+    cout << "| " << setw(6) << cabeca->no->carro->placa;
+    cout << " | " << setw(17) << cabeca->no->carro->modelo;
+    cout << " | " << setw(10) << cabeca->no->carro->marca;
+    cout << " | " << setw(7) << cabeca->no->carro->tipo;
+    cout << " | " << setw(4) << cabeca->no->carro->ano;
+    cout << " | " << setw(6) << cabeca->no->carro->km;
+    cout << " | " << setw(3) << cabeca->no->carro->potencia;
+
+    if(cabeca->no->carro->combustivel == "Gasolina") {
+        cout << " | " << setw(6) << "Gaso.";
+    } else {
+        cout << " | " << setw(6) << cabeca->no->carro->combustivel;
+    }
+
+    cout << " | " << setw(10) << cabeca->no->carro->cambio;
+    cout << " | " << setw(10) << cabeca->no->carro->direcao;
+    cout << " | " << setw(8) << cabeca->no->carro->cor;
+    cout << " | " << setw(2) << cabeca->no->carro->portas;
+    cout << " | " << setw(6) << cabeca->no->carro->preco << " |" << endl;
+
+    if(cabeca->esquerda) 
+        relatorio_preordem_carros(cabeca->esquerda);
+
+    if(cabeca->direita) 
+        relatorio_preordem_carros(cabeca->direita);
+
+}
+
+/**
+ * Imprime o relatório de uma árvore binária em pré-ordem com o cabeçalho
+ * @param arvore_ o cabeçalho da árvore em que será impressa em pré-ordem
+*/
+void relatorio_preordem(arvore * arvore_) {
+    cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
+    cout << "|  PLACA  |      MODELO       |    MARCA   |   TIPO  |  ANO |   KM   | POT |  COMB  |   CAMBIO   |   DIREÇAO  |    COR   | PT | PREÇO  |" << endl;
+    cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
+
+    relatorio_preordem_carros(arvore_->cabeca);
+
+    cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+\033[0m" << endl;
+
+}
+
+
+
 int main(void) {
 
     cout << "                                    _               __       _      "
@@ -407,5 +479,7 @@ int main(void) {
         }
 
     } 
+
+    relatorio_preordem(arvoreBinaria);
 
 }
