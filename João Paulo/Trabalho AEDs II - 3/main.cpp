@@ -10,8 +10,6 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
-#include "headers.h"
-
 
 using namespace std;
 
@@ -222,7 +220,7 @@ int remover_arv_binaria(noArv ** cabeca, string placa) {
  * @returns 1 caso seja possível realizar a remoção
  * @returns 0 caso não seja possível realizar a remoção
 */
-int remover_veiculo(cabecalho * listaPrincipal, arvore ** avl, arvore ** binaria, string placa) {
+int remover_veiculo(cabecalho * listaPrincipal, string placa) {
     no_ * atual = listaPrincipal->primeiro;
     no_ * anterior = NULL;
 
@@ -254,6 +252,20 @@ int remover_veiculo(cabecalho * listaPrincipal, arvore ** avl, arvore ** binaria
 }
 
 /**
+ * Cria um novo nó para a árvore binária de busca
+ * @param no o nó ao qual a nova folha da árvore binária de busca estará apontando
+ * @return o novo nó criado
+*/
+noArv * criarNovoNo_(no_ * no) {
+    noArv * novoNo = new noArv;
+    novoNo->esquerda = NULL;
+    novoNo->direita = NULL;
+    novoNo->placa = no->carro->placa;
+    novoNo->no = no;
+    return novoNo;
+}
+
+/**
  * Insere um novo nó na árvore binária
  * @param folha a primeira folha da árvore binária de onde será inserido o novo nó
  * @param no o nó que a struct da folha irá apontar
@@ -267,12 +279,7 @@ int inserir_arv_binaria(noArv * folha, no_ * no) {
 
     if (folha->placa > no->carro->placa) {
         if (!folha->esquerda) {
-            noArv * novoNo = new noArv;
-            folha->esquerda = novoNo;
-            novoNo->esquerda = NULL;
-            novoNo->direita = NULL;
-            novoNo->placa = no->carro->placa;
-            novoNo->no = no;
+            folha->esquerda = criarNovoNo_(no);
             return 1;
         }
 
@@ -281,70 +288,14 @@ int inserir_arv_binaria(noArv * folha, no_ * no) {
 
     if (folha->placa < no->carro->placa) {
         if (!folha->direita) {
-            noArv * novoNo = new noArv;
-            folha->direita = novoNo;
-            novoNo->esquerda = NULL;
-            novoNo->direita = NULL;
-            novoNo->placa = no->carro->placa;
-            novoNo->no = no;
+            folha->direita = criarNovoNo_(no);
             return 1;
         }
 
         return inserir_arv_binaria(folha->direita, no);
     }
-}
 
-/**
- * Insere um veículo na listaPrincipal, na árvore binária AVL e na arvore binária de busca simultâneamente
- * @param listaPrincipal a lista principal onde será inserido o novo veículo
- * @param avl a árvore binária AVL onde será inserido o novo veículo
- * @param binaria a árvore binária de busca onde será inserido o novo véiculo
- * @param carro o novo carro que será inserido nas estruturas
-*/
-int inserir_veiculo(cabecalho * listaPrincipal, arvore * avl, arvore * arvores, veiculo * carro) {
-
-    no_ * novoNo = new no_; /* O novo nó que será inserido na listaPrincipal*/
-    novoNo->carro = carro;
-    novoNo->proximo = NULL;
-
-    if (!listaPrincipal->primeiro) {
-        listaPrincipal->primeiro = novoNo;
-        listaPrincipal->ultimo = novoNo;
-    } else {
-        listaPrincipal->ultimo->proximo = novoNo;
-        listaPrincipal->ultimo = novoNo;
-    }
-
-    if (1 /* Condição de filtro a ser implementada para arvore binária*/) {
-        if (!arvores->arvore_binaria) {
-            noArv * novaFolha = new noArv;
-            arvores->arvore_binaria = novaFolha;
-            novaFolha->direita = NULL;
-            novaFolha->esquerda = NULL;
-            novaFolha->placa = carro->placa;
-            novaFolha->no = novoNo;
-        } else {
-            inserir_arv_binaria(arvores->arvore_binaria, novoNo);
-        } 
-    }
-
-    if(1 /* Condição de filtro a ser implementado para árvore binária */) {
-        if(!arvores->arvore_avl) {
-            noArvAVL * novaFolha = new noArvAVL;
-            arvores->arvore_avl = novaFolha;
-            novaFolha->bal = 0;
-            novaFolha->direita = NULL;
-            novaFolha->esquerda = NULL;
-            novaFolha->placa = carro->placa;
-            novaFolha->no = novoNo;
-        } else {
-            
-        }
-    }
-
-
-
-
+    return 0;
 }
 
 /**
@@ -409,7 +360,7 @@ void relatorio(cabecalho * listaPrincipal) {
  * Imprime a lista de todos os carros de uma árvore em pré-ordem sem o cabecalho das informações
  * @param cabeca o primeiro nó da árvore binária
 */
-void relatorio_preordem_carros(noArv * cabeca) {
+void relatorio_binaria(noArv * cabeca) {
     
     if (!cabeca) {
         cout << "Impossível mostrar o relatório. A árvore está vazia" << endl;
@@ -437,25 +388,493 @@ void relatorio_preordem_carros(noArv * cabeca) {
     cout << " | " << setw(6) << cabeca->no->carro->preco << " |" << endl;
 
     if(cabeca->esquerda) 
-        relatorio_preordem_carros(cabeca->esquerda);
+        relatorio_binaria(cabeca->esquerda);
 
     if(cabeca->direita) 
-        relatorio_preordem_carros(cabeca->direita);
+        relatorio_binaria(cabeca->direita);
 
+}
+
+/**
+ * Faz o relatório da árvore principal em pre-ordem
+ * @param cabeca o primeiro nó da árvore AVL
+*/
+void relatorio_avl(noArvAVL * cabeca) {
+    if (!cabeca) {
+        cout << "Impossível mostrar o relatório. A árvore está vazia." << endl;
+        return;
+    }
+
+    cout << "| " << setw(6) << cabeca->no->carro->placa;
+    cout << " | " << setw(17) << cabeca->no->carro->modelo;
+    cout << " | " << setw(10) << cabeca->no->carro->marca;
+    cout << " | " << setw(7) << cabeca->no->carro->tipo;
+    cout << " | " << setw(4) << cabeca->no->carro->ano;
+    cout << " | " << setw(6) << cabeca->no->carro->km;
+    cout << " | " << setw(3) << cabeca->no->carro->potencia;
+
+    if(cabeca->no->carro->combustivel == "Gasolina") {
+        cout << " | " << setw(6) << "Gaso.";
+    } else {
+        cout << " | " << setw(6) << cabeca->no->carro->combustivel;
+    }
+
+    cout << " | " << setw(10) << cabeca->no->carro->cambio;
+    cout << " | " << setw(10) << cabeca->no->carro->direcao;
+    cout << " | " << setw(8) << cabeca->no->carro->cor;
+    cout << " | " << setw(2) << cabeca->no->carro->portas;
+    cout << " | " << setw(6) << cabeca->no->carro->preco << " |" << endl;
+
+    if(cabeca->esquerda) 
+        relatorio_avl(cabeca->esquerda);
+
+    if(cabeca->direita) 
+        relatorio_avl(cabeca->direita);
 }
 
 /**
  * Imprime o relatório de uma árvore binária em pré-ordem com o cabeçalho
  * @param arvore_ o cabeçalho da árvore em que será impressa em pré-ordem
 */
-void relatorio_preordem(arvore * arvore_) {
+void relatorio_preordem(noArv * binaria = NULL, noArvAVL * avl = NULL) {
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
     cout << "|  PLACA  |      MODELO       |    MARCA   |   TIPO  |  ANO |   KM   | POT |  COMB  |   CAMBIO   |   DIREÇAO  |    COR   | PT | PREÇO  |" << endl;
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
 
-    relatorio_preordem_carros(arvore_->arvore_binaria);
+    if (binaria)
+        relatorio_binaria(binaria);
+    else if (avl) 
+        relatorio_avl(avl);
 
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+\033[0m" << endl;
+
+}
+
+/**
+ * Realiza a criação de um novo nó para a árvore AVL
+ * @param no O nó da lista principal ao qual a nova folha da árvore AVL vai estar apontando
+ * @return o ponteiro para o novo nó de folha criado para a árvore AVL
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/
+noArvAVL * criarNovoNo(no_ * no){
+    noArvAVL * novoNo = new noArvAVL;
+    novoNo->no = no;
+    novoNo->esquerda = NULL;
+    novoNo->direita = NULL;
+    novoNo->placa = no->carro->placa;
+    novoNo->bal = 0;
+    return novoNo;
+}
+
+/**
+ * Realiza a rotação do tipo L para manter a árvore AVL equilibrada
+ * @param p o ponteiro de um nó da árvore AVL
+ * @return um ponteiro para o nó da árvore AVL
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/
+noArvAVL * rotacaoL(noArvAVL * p){
+    noArvAVL * u, * v;
+    u = p->esquerda;
+    if(u->bal == -1) {   // LL
+        p->esquerda = u->direita;
+        u->direita = p;
+        p->bal = 0;
+        u->bal = 0;
+        return u;
+    }
+    else 
+        if (u->bal == 1) {  // LR
+            v = u->direita;
+            u->direita = v->esquerda;
+            v->esquerda = u;
+            p->esquerda = v->direita;
+            v->direita = p;
+            if(v->bal == -1)
+                p->bal = 1;
+            else
+                p->bal = 0;
+            if(v->bal == 1)
+                u->bal = -1;
+            else
+                u->bal = 0;
+            v->bal = 0;
+            return v;
+    }else{   // caso necessario apenas para a exclusao (u->bal == 0)
+            p->esquerda = u->direita;
+            u->direita = p;
+            // p->bal = -1;    desnecessario pois o balanceamento de p nao chegou a ser mudado para -2
+            u->bal = 1;
+            return u;
+    }
+}
+ 
+/**
+ *  Rotações à esquerda (RR e RL) 
+ *  Retornará o endereço do nó que será a nova raiz da subárvore originalmente
+ *  @param p o ponteiro de um nó da árvore AVL onde será relizada a rotação
+ *  @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/
+noArvAVL * rotacaoR(noArvAVL * p){
+    noArvAVL * u, * v;
+    u = p->direita;
+    if(u->bal == 1) {   // RR
+        p->direita = u->esquerda;
+        u->esquerda = p;
+        p->bal = 0;
+        u->bal = 0;
+    return u;
+    } 
+    else 
+        if (u->bal == -1){  // RL
+            v = u->esquerda;
+            u->esquerda = v->direita;
+            v->direita = u;
+            p->direita = v->esquerda;
+            v->esquerda = p;
+            if(v->bal == 1)
+                p->bal = -1;
+            else 
+                p->bal = 0;
+            if(v->bal == -1)
+                u->bal = 1;
+            else
+                u->bal = 0;
+            v->bal = 0;
+            return v;
+    }else{   // caso necessario apenas para a exclusao (u->bal == 0)
+            p->direita = u->esquerda;
+            u->esquerda = p;
+            u->bal = -1;
+            // p->bal = 1;    desnecessario pois o balanceamento de p nao chegou a ser mudado para 2
+            return u;   
+    }
+}
+ 
+/**
+ * Realiza uma inserção na árvore AVL
+ * @param pp o nó raiz da árvore
+ * @param placa a placa do carro ao qual o nó da lista principal se refere
+ * @param alterou 
+ * @param no o nó da lista principal que será indicado pela folha da raiz
+ * @author http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/                                       
+void inserirAVL(noArvAVL ** pp, string placa, bool* alterou, no_ * no){
+    noArvAVL * p = *pp;
+    if(!p){
+        *pp = criarNovoNo(no);
+        *alterou = true;
+    } else {
+        if(placa == p->placa)
+            *alterou = false;
+        else
+            if(placa <= p->placa) {
+                inserirAVL(&(p->esquerda), placa, alterou, no);
+                if(*alterou)
+                    switch (p->bal) {
+                        case 1 :
+                            p->bal = 0;
+                            *alterou = false;
+                            break;
+            case 0 : 
+                            p->bal = -1;
+                            break;
+            case -1:
+                            *pp = rotacaoL(p);
+                            *alterou = false;
+                            break;
+            }
+        } else {
+                    inserirAVL(&(p->direita), placa, alterou, no);
+                    if(*alterou)
+                        switch (p->bal) {
+                            case -1:
+                                p->bal = 0;
+                *alterou = false;
+                                break;
+                            case 0 :
+                                p->bal = 1;
+                break;
+                            case 1 :
+                                *pp = rotacaoR(p);
+                *alterou = false;
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * Função desenvolvida como auxiliar da função excluirChave, procura a maior placa menor que a placa que será excluida.
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c 
+ */ 
+noArvAVL * maiorAEsquerda(noArvAVL *p, noArvAVL **ant){
+    *ant = p;
+    p = p->esquerda;
+    while (p->direita) {
+        *ant = p;
+        p = p->direita;
+    }
+    return(p);
+}
+ 
+/**
+ * Exclui um nó da árvore AVL
+ * @param raiz o ponteiro que aponta para o ponteiro que aponta para a raiz da árvore
+ * @param placa a placa do veículo que será excluido da árvore
+ * @param alterou 
+ * @param no o nó da lista principal ao qual o nó da folha está se referindo
+ * @returns true para casp tenha sido possível realizar a remoção 
+ * @returns false para caso não tenha sido possível realizar a remoção
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/
+bool excluirAVL(noArvAVL ** raiz, string placa, bool* alterou){
+    noArvAVL * atual = *raiz;
+    if (!atual) {
+        *alterou = false;
+        return false;
+    }
+    if (atual->placa == placa){
+        noArvAVL * substituto, *pai_substituto;
+        if (!atual->esquerda || !atual->direita) { // tem zero ou um filho
+            if(atual->esquerda)
+                substituto = atual->esquerda;
+            else 
+                substituto = atual->direita;
+            *raiz = substituto;
+            delete(atual);
+            *alterou = true;
+            return true;
+        }
+        else {   // tem dois filhos
+            substituto = maiorAEsquerda(atual,&pai_substituto);
+            atual->placa = substituto->placa;
+            placa = substituto->placa; // continua o codigo excluindo o substituto
+        }
+    }
+    bool res;
+    if (placa > atual->placa) {
+        res = excluirAVL(&(atual->direita), placa, alterou);
+        if (*alterou){
+            switch (atual->bal){
+                case 1:
+                    atual->bal = 0;
+                    return true;
+                case 0:
+                    atual->bal = -1;
+                    *alterou = false;
+                    return true;
+                case -1:
+                    *raiz = rotacaoL(atual);
+                    if (atual->bal != 0)
+                        *alterou = false;
+                    return true;
+            }
+        }
+    } else {
+        res = excluirAVL(&(atual->esquerda), placa, alterou);
+        if (*alterou){
+            switch (atual->bal){
+                case -1:
+                    atual->bal = 0;
+                    return true;
+                case 0:
+                    atual->bal = 1;
+                    *alterou = false;
+                    return true;
+                case 1:
+                    *raiz = rotacaoR(atual);
+                    if (atual->bal != 0)
+                        *alterou = false;
+                    return true;
+            }
+        }
+    }
+    return res;
+}
+/**
+ * BUG - NAO CONSEGUE EXCLUIR DA ARVORE AVL POR ALGUM MOTIVO
+ * DESCONHECIDO DO ALEM
+ * PROVAVELMENTE VAI TER QUE TROCAR TODO O CÓDIGO DA ARVORE
+ * AVL :(
+*/
+
+
+
+/**
+ * Realiza a rotação L2
+ * @param o ponteiro de onde será realizada a rotação L2
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/
+void rotacaoL2(noArvAVL **p) {
+    noArvAVL *u, *v;
+    u = (*p)->esquerda;
+    if (u->bal == -1) { // LL
+        (*p)->esquerda = u->direita;
+        u->direita = *p;
+        (*p)->bal = 0;
+        *p = u;
+    } else { // LR
+        v = u->direita;
+        u->direita = v->esquerda;
+        v->esquerda = u;
+        (*p)->esquerda = v->direita;
+        v->direita = *p;
+        if (v->bal == -1)
+            (*p)->bal = 1;
+        else 
+            (*p)->bal = 0;
+        if (v->bal == 1)
+            u->bal = -1;
+        else 
+            u->bal = 0;
+        *p = v;
+        }
+        (*p)->bal = 0; // balanço final da raiz (p) da subarvore
+    }
+
+/**
+ * Insere um veículo na listaPrincipal, na árvore binária AVL e na arvore binária de busca simultâneamente
+ * @param listaPrincipal a lista principal onde será inserido o novo veículo
+ * @param avl a árvore binária AVL onde será inserido o novo veículo
+ * @param binaria a árvore binária de busca onde será inserido o novo véiculo
+ * @param carro o novo carro que será inserido nas estruturas
+*/
+int inserir_veiculo(cabecalho * listaPrincipal, arvore * arvores, veiculo * carro, bool alterou) {
+
+    no_ * novoNo = new no_; /* O novo nó que será inserido na listaPrincipal*/
+    novoNo->carro = carro;
+    novoNo->proximo = NULL;
+
+    if (!listaPrincipal->primeiro) {
+        listaPrincipal->primeiro = novoNo;
+        listaPrincipal->ultimo = novoNo;
+    } else {
+        listaPrincipal->ultimo->proximo = novoNo;
+        listaPrincipal->ultimo = novoNo;
+    }
+
+    if (1 /* Condição de filtro a ser implementada para arvore binária*/) {
+        if (!arvores->arvore_binaria) {
+            noArv * novaFolha = new noArv;
+            arvores->arvore_binaria = novaFolha;
+            novaFolha->direita = NULL;
+            novaFolha->esquerda = NULL;
+            novaFolha->placa = carro->placa;
+            novaFolha->no = novoNo;
+        } else {
+            inserir_arv_binaria(arvores->arvore_binaria, novoNo);
+        } 
+    }
+
+    if(carro->cambio == "Manual") { /*Filtro para carro manual AVL*/
+        if(!arvores->arvore_avl) {
+            noArvAVL * novaFolha = new noArvAVL;
+            arvores->arvore_avl = novaFolha;
+            novaFolha->bal = 0;
+            novaFolha->direita = NULL;
+            novaFolha->esquerda = NULL;
+            novaFolha->placa = carro->placa;
+            novaFolha->no = novoNo;
+        } else {
+            inserirAVL(&arvores->arvore_avl, carro->placa, &alterou, novoNo);
+        }
+    }
+
+
+}
+
+/**
+ * Mostra o menu de opções principais para o usuario
+ * @return A string com a opçao escolhida pelo usuario
+*/
+string menu_opcoes(void) {
+    string option;
+    string opcoes = "\033[1mO que você deseja fazer? \033[0m(I)nserir, (C)onsulta, (R)elatório, (B)inaria, (A)VL, (S)air => ";
+    cout << "\n" << opcoes;
+    cin >> option;
+
+    while(toupper(option[0]) != 'I' && toupper(option[0]) != 'C' && toupper(option[0]) != 'R' && toupper(option[0]) != 'B' && 
+          toupper(option[0]) != 'A' && toupper(option[0]) != 'S') {
+            cout << "\033[31mOpçao invalida. Por favor, tente novamente.\033[0m" << endl;
+            cout << opcoes;
+            cin >> option;
+          }
+    
+    return option;
+}
+
+void consulta(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
+
+    string placa;
+
+    cout << "\033[1mDigite a placa que você deseja consultar =>\033[0m ";
+    cin >> placa;
+
+    no_ * atual = listaPrincipal->primeiro;
+
+    if(!atual) {
+        cout << "A lista principal está vazia." << endl;
+        return;
+    }
+
+    while(atual->carro->placa != placa) {
+        atual = atual->proximo;
+        
+        if (!atual)
+            break;
+    }
+
+    if(!atual) {
+        cout << "Não foi encontrado nenhum carro com essa placa. Por favor, tente novamente." << endl;
+        return;
+    }
+
+    cout << "\033[32mVeículo encontrado com sucesso no banco de dados!\033[0m" << endl;
+    cout << "\033[1mO que você deseja fazer com o veículo encontrado?\033[0m (I)nformações, (E)xcluir, (V)oltar => ";
+    string option;
+    cin >> option;
+                
+    while(toupper(option[0]) != 'I' && toupper(option[0]) != 'E' && toupper(option[0]) != 'V'){
+        cout << "\033[31mOpçao invalida. Por favor, tente novamente.\033[0m" << endl;
+        cout << "\033[1mO que você deseja fazer com o veículo encontrado?\033[0m (I)nformações, (R)emover, (V)oltar =>";
+        cin >> option;
+    }
+
+    if(toupper(option[0]) == 'V') 
+        return;
+
+    if(toupper(option[0]) == 'I') {
+        cout << "\033[1m+---------+-------------------+------------+---------+------+--------+-----+----------+------------+------------+----------+----+--------+" << endl;
+        cout << "|  PLACA  |      MODELO       |    MARCA   |   TIPO  | ANO  |   KM   | POT |   COMB   |   CAMBIO   |   DIREÇAO  |    COR   | PT | PREÇO  |" << endl;
+        cout << "+---------+-------------------+------------+---------+------+--------+-----+----------+------------+------------+----------+----+--------+" << endl;
+        cout << "| " << setw(6) << atual->carro->placa;
+        cout << " | " << setw(17) << atual->carro->modelo;
+        cout << " | " << setw(10) << atual->carro->marca;
+        cout << " | " << setw(7) << atual->carro->tipo;
+        cout << " | " << setw(4) << atual->carro->ano;
+        cout << " | " << setw(6) << atual->carro->km;
+        cout << " | " << setw(3) << atual->carro->potencia;
+        cout << " | " << setw(8) << atual->carro->combustivel;
+        cout << " | " << setw(10) << atual->carro->cambio;
+        cout << " | " << setw(10) << atual->carro->direcao;
+        cout << " | " << setw(8) << atual->carro->cor;
+        cout << " | " << setw(2) << atual->carro->portas;
+        cout << " | " << setw(6) << atual->carro->preco << " |" << endl;
+        cout << "+---------+-------------------+------------+---------+------+--------+-----+----------+------------+------------+----------+----+--------+\033[0m" << endl;
+        return;
+    }
+
+    if(toupper(option[0]) == 'E') {
+        cout << "0" << endl;
+        excluirAVL(&arvores->arvore_avl, placa, alterou);
+        cout << "1" << endl;
+        remover_arv_binaria(&arvores->arvore_binaria, placa);
+        cout << "2" << endl;
+        remover_veiculo(listaPrincipal, placa);
+        cout << "3" << endl;
+        cout << "\033[32mVeículo deletado com sucesso no banco de dados!\033[0m" << endl;
+        return;
+    }  
 
 }
 
@@ -471,8 +890,8 @@ int main(void) {
 
     ifstream bancoDeDados("DB_Veiculos");
     cabecalho * listaPrincipal = inicia_lista();
-    arvore * avl = inicia_arvore();
-    arvore * arvoreBinaria = inicia_arvore();
+    arvore * arvores = inicia_arvore();
+    bool alterou = false;
 
     if (bancoDeDados.is_open()) {
         while (!bancoDeDados.eof()) {
@@ -491,11 +910,27 @@ int main(void) {
             bancoDeDados >> carro->placa;
             bancoDeDados >> carro->preco;
 
-            inserir_veiculo(listaPrincipal, avl, arvoreBinaria, carro);
+            inserir_veiculo(listaPrincipal, arvores, carro, alterou);
         }
 
     } 
 
-    relatorio_preordem(arvoreBinaria);
+    string option = menu_opcoes();
 
+    while(toupper(option[0]) != 'S') {
+
+        if(toupper(option[0]) ==  'A') 
+            relatorio_preordem(NULL, arvores->arvore_avl);
+        
+        if(toupper(option[0]) == 'B')
+            relatorio_preordem(arvores->arvore_binaria);
+        
+        if(toupper(option[0]) == 'R')
+            relatorio(listaPrincipal);
+        
+        if(toupper(option[0]) == 'C')
+            consulta(listaPrincipal, arvores, &alterou);
+
+        option = menu_opcoes();
+    };
 }
