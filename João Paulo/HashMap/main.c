@@ -16,18 +16,14 @@ typedef struct  hash_ {
 /**FUNÇÕES DE HASHING**/
 
 int chave_divisao(int chave, int TABLE_SIZE) {
-    if (chave < 0) {
+    if (chave < 0) 
         chave *= -1;
-    }
-
     return chave % TABLE_SIZE;
 }
 
 int chave_multiplicacao(int chave, int TABLE_SIZE) {
-    if (chave < 0) {
+    if (chave < 0) 
         chave *= -1;
-    }
-
     double A = 0.7834729723;
     double val = chave * A;
     val = val - (int) val;
@@ -35,13 +31,11 @@ int chave_multiplicacao(int chave, int TABLE_SIZE) {
 }
 
 int chave_dobra(int chave, int TABLE_SIZE) {
-    if (chave < 0) {
+    if (chave < 0) 
         chave *= -1;
-    }
 
-    if (chave < TABLE_SIZE) {
+    if (chave < TABLE_SIZE) 
         return chave;
-    }
 
     int numeros[10];
     int inicio = 0;
@@ -53,7 +47,7 @@ int chave_dobra(int chave, int TABLE_SIZE) {
         numeros[inicio] = resto;
         if (numeros[inicio])
             fim = inicio;
-        inicio ++;
+        inicio++;
         div = div / 10;
     } while (inicio < 10);
 
