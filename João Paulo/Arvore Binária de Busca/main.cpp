@@ -77,10 +77,10 @@ int insere_valor(no * cabeca, int valor) {
  */
 no ** encontrar_no(no ** no_, int valor) {
     
-    no * noAtual = *&*no_;
+    no * noAtual = *no_;
     no ** ponteiro = no_;
 
-    while(noAtual->valor != valor && noAtual) {
+    while(noAtual->valor != valor) {
         if(noAtual->valor < valor) {
             ponteiro = &noAtual->direita;
             noAtual = noAtual->direita;
@@ -90,10 +90,10 @@ no ** encontrar_no(no ** no_, int valor) {
             ponteiro = &noAtual->esquerda;
             noAtual = noAtual->esquerda;
         }
-    }
 
-    if(!noAtual) 
-        return NULL;
+        if(!noAtual)
+            return NULL;
+    }
 
     return ponteiro;
 
@@ -106,12 +106,13 @@ no ** encontrar_no(no ** no_, int valor) {
 */
 void remover_valor(no ** cabeca, int valor) {
     no ** pontExcluir = encontrar_no(cabeca, valor);
-    no * noExcluir = *&*pontExcluir;
 
     if (!pontExcluir) { /*Se excluir == NULL, entao quer dizer que não existe o valor específico na árvore*/ 
         return;
     }
 
+    no * noExcluir = *&*pontExcluir;
+    
     if (!noExcluir->esquerda && !noExcluir->direita) {
         *pontExcluir = NULL;
     }
@@ -202,12 +203,16 @@ void pos_ordem(no * cabeca) {
 
 int main(void) {
 
-    no * cabeca = inicia_arvore(6);
-    insere_valor(cabeca, 2);
-    insere_valor(cabeca, 8);
-    insere_valor(cabeca, 1);
-    insere_valor(cabeca, 4);
-    insere_valor(cabeca, 3);
+    no * cabeca = inicia_arvore(13);
+    insere_valor(cabeca, 22);
+    insere_valor(cabeca, 6);
+    insere_valor(cabeca, 5);
+    insere_valor(cabeca, 7);
+    insere_valor(cabeca, 21);
+    insere_valor(cabeca, 24);
+
+    remover_valor(&cabeca, 13);
+    remover_valor(&cabeca, 13);
 
     em_ordem(cabeca);
 
