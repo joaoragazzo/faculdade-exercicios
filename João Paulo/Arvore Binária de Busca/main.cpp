@@ -99,6 +99,11 @@ no ** encontrar_no(no ** no_, int valor) {
 
 }
 
+/**
+ * Remove um valor da árvore binária
+ * @param cabeca o primeiro nó da árvore
+ * @param valor o primeiro valor da árvore
+*/
 void remover_valor(no ** cabeca, int valor) {
     no ** pontExcluir = encontrar_no(cabeca, valor);
     no * noExcluir = *&*pontExcluir;
@@ -132,7 +137,78 @@ void remover_valor(no ** cabeca, int valor) {
 
 }
 
+/**
+ * Imprime a árvore em pré-ordem
+ * @param cabeca o primeiro nó da árvore
+*/
+void pre_ordem(no * cabeca) {
+    if (!cabeca) {
+        cout << "A árvore está vazia." << endl;
+        return;
+    }
+
+    cout << cabeca->valor << endl;
+
+    if (cabeca->esquerda) 
+        pre_ordem(cabeca->esquerda);
+
+    if (cabeca->direita) 
+        pre_ordem(cabeca->direita);
+
+    return;
+}
+
+/**
+ * Imprime a árvore em-ordem
+ * @param cabeca o primeiro nó da árvore
+*/
+void em_ordem(no * cabeca) {
+    if (!cabeca) {
+        cout << "A árvore está vazia." << endl;
+        return;
+    }
+
+    if(cabeca->esquerda)
+        em_ordem(cabeca->esquerda);
+
+    cout << cabeca->valor << endl;
+
+    if(cabeca->direita)
+        em_ordem(cabeca->direita);
+
+    return;
+}
+
+/**
+ * Imprime a árvore em pós-ordem
+ * @param cabeca o primeiro nó da árvore
+*/
+void pos_ordem(no * cabeca) {
+    if (!cabeca) {
+        cout << "A árvore está vazia" << endl;
+        return;
+    }
+
+    if (cabeca->esquerda) 
+        pos_ordem(cabeca->esquerda);
+    
+    if (cabeca->direita)
+        pos_ordem(cabeca->direita);
+    
+    cout << cabeca->valor << endl;
+
+    return;
+}
 
 int main(void) {
+
+    no * cabeca = inicia_arvore(6);
+    insere_valor(cabeca, 2);
+    insere_valor(cabeca, 8);
+    insere_valor(cabeca, 1);
+    insere_valor(cabeca, 4);
+    insere_valor(cabeca, 3);
+
+    em_ordem(cabeca);
 
 }

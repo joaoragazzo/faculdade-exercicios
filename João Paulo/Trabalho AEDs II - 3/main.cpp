@@ -113,7 +113,6 @@ cabecalho * inicia_lista(void) {
     cabecalho * tmp = new cabecalho;
     tmp->primeiro = NULL;
     tmp->ultimo = NULL;
-    cout << "\033[32mA lista foi alocada com sucesso.\033[0m" << endl;
     return tmp;
 }
 
@@ -166,92 +165,6 @@ noArv ** encontrar_no(noArv ** cabeca, string placa) {
 }
 
 /**
- * Remove um nó da árvore binária
- * @param cabeca O endereço do primeiro ponteiro que aponta para o primeiro nó da árvore
- * @param placa A placa a ser procurada na árvore binária
- * @returns 1 caso seja possível realizar a remoção
- * @returns 0 caso não seja possível realizar a remoção
-*/
-int remover_arv_binaria(noArv ** cabeca, string placa) {
-    
-    noArv ** pontExcluir = encontrar_no(cabeca, placa);
-
-    if (!pontExcluir) { /* Caso pontExcluir == NULL, então quer dizer que não foi encontrado */
-        return 0;
-    }
-    
-    noArv * noExcluir = *&*pontExcluir;
-
-    if (!noExcluir->esquerda && !noExcluir->direita) { /* Caso noExcluir seja o último da árvore */
-        *pontExcluir = NULL;
-        delete noExcluir;
-        return 1;
-    }
-
-    if (!noExcluir->esquerda && noExcluir->direita) {
-        *pontExcluir = noExcluir->direita;
-        delete noExcluir;
-        return 1;
-    }
-
-    noArv * tmp = noExcluir->esquerda;
-    noArv * tmp_pai = noExcluir;
-
-    while(tmp->direita) {
-        tmp_pai = tmp;
-        tmp = tmp->direita;
-    }
-
-    tmp->direita = noExcluir->direita;
-    tmp->esquerda = noExcluir->esquerda;
-    tmp_pai->direita = NULL;
-    *pontExcluir = tmp;
-
-
-    return 1;
-}
-
-/**
- * Remove um veículo da lista principal, da árvore AVL e da árvore binária simultâneamente
- * @param listaPrincipal a ListaPrincipal de onde será removido o vepiculo
- * @param avl a árvore binária AVL de onde será removido o veículo
- * @param binaria a árvore binária de busca de onde será removido o veículo
- * @param placa a placa do veículo que será removido das estruturas
- * @returns 1 caso seja possível realizar a remoção
- * @returns 0 caso não seja possível realizar a remoção
-*/
-int remover_veiculo(cabecalho * listaPrincipal, string placa) {
-    no_ * atual = listaPrincipal->primeiro;
-    no_ * anterior = NULL;
-
-    if (!atual) {
-        cout << "A lista está vazia. Impossível de realizar a remoção." << endl;
-        return 0;
-    }
-
-    while (atual && atual->carro->placa != placa) {
-        anterior = atual;
-        atual = atual->proximo;
-    }
-
-    if(!atual) {
-        cout << "O carro com essa placa não foi encontrado no nosso banco de dados. Por favor, certifique-se de que a placa foi escrita corretamente. " << endl;
-        return 0;
-    }
-
-    if (!anterior) {
-        listaPrincipal->primeiro = atual->proximo;
-    } else {
-        anterior->proximo = atual->proximo;
-    }
-
-    delete atual->carro;
-    delete atual;
-
-    return 1;
-}
-
-/**
  * Cria um novo nó para a árvore binária de busca
  * @param no o nó ao qual a nova folha da árvore binária de busca estará apontando
  * @return o novo nó criado
@@ -266,51 +179,19 @@ noArv * criarNovoNo_(no_ * no) {
 }
 
 /**
- * Insere um novo nó na árvore binária
- * @param folha a primeira folha da árvore binária de onde será inserido o novo nó
- * @param no o nó que a struct da folha irá apontar
- * @return 1 caso seja possível realizar a inserção
- * @return 0 caso não seja possível realizar a inserção
+ * Realiza a criação de um novo nó para a árvore AVL
+ * @param no O nó da lista principal ao qual a nova folha da árvore AVL vai estar apontando
+ * @return o ponteiro para o novo nó de folha criado para a árvore AVL
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
 */
-int inserir_arv_binaria(noArv * folha, no_ * no) {
-    if (folha->placa == no->carro->placa) {
-        return 0;
-    }
-
-    if (folha->placa > no->carro->placa) {
-        if (!folha->esquerda) {
-            folha->esquerda = criarNovoNo_(no);
-            return 1;
-        }
-
-        return inserir_arv_binaria(folha->esquerda, no);
-    }
-
-    if (folha->placa < no->carro->placa) {
-        if (!folha->direita) {
-            folha->direita = criarNovoNo_(no);
-            return 1;
-        }
-
-        return inserir_arv_binaria(folha->direita, no);
-    }
-
-    return 0;
-}
-
-/**
- * Exibe uma árvore binária
- * @param folha A primeira folha da árvore binária a qual deseja ser inserida
-*/
-void exibirArvore(noArv * folha) {
-    if (!folha) {
-        return;
-    }
-    cout << "\"" << folha->placa << "\"";
-    cout << "(";
-    exibirArvore(folha->esquerda);
-    exibirArvore(folha->direita);
-    cout << ")";
+noArvAVL * criarNovoNo(no_ * no){
+    noArvAVL * novoNo = new noArvAVL;
+    novoNo->no = no;
+    novoNo->esquerda = NULL;
+    novoNo->direita = NULL;
+    novoNo->placa = no->carro->placa;
+    novoNo->bal = 0;
+    return novoNo;
 }
 
 /**
@@ -434,9 +315,15 @@ void relatorio_avl(noArvAVL * cabeca) {
 
 /**
  * Imprime o relatório de uma árvore binária em pré-ordem com o cabeçalho
- * @param arvore_ o cabeçalho da árvore em que será impressa em pré-ordem
+ * Observação: colocar apenas uma arvore, e a outra deixar como NULL
+ * @param binaria a arvore binaria que irá realizar o relatório em préordem 
+ * @param avl a arvore avl que irá realizar o relatório em préordem
 */
 void relatorio_preordem(noArv * binaria = NULL, noArvAVL * avl = NULL) {
+    if (binaria && avl) 
+        return;
+    
+
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
     cout << "|  PLACA  |      MODELO       |    MARCA   |   TIPO  |  ANO |   KM   | POT |  COMB  |   CAMBIO   |   DIREÇAO  |    COR   | PT | PREÇO  |" << endl;
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+" << endl;
@@ -448,22 +335,6 @@ void relatorio_preordem(noArv * binaria = NULL, noArvAVL * avl = NULL) {
 
     cout << "+---------+-------------------+------------+---------+------+--------+-----+--------+------------+------------+----------+----+--------+\033[0m" << endl;
 
-}
-
-/**
- * Realiza a criação de um novo nó para a árvore AVL
- * @param no O nó da lista principal ao qual a nova folha da árvore AVL vai estar apontando
- * @return o ponteiro para o novo nó de folha criado para a árvore AVL
- * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
-*/
-noArvAVL * criarNovoNo(no_ * no){
-    noArvAVL * novoNo = new noArvAVL;
-    novoNo->no = no;
-    novoNo->esquerda = NULL;
-    novoNo->direita = NULL;
-    novoNo->placa = no->carro->placa;
-    novoNo->bal = 0;
-    return novoNo;
 }
 
 /**
@@ -558,7 +429,7 @@ noArvAVL * rotacaoR(noArvAVL * p){
  * @param no o nó da lista principal que será indicado pela folha da raiz
  * @author http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
 */                                       
-void inserirAVL(noArvAVL ** pp, string placa, bool* alterou, no_ * no){
+void inserir_arv_avl(noArvAVL ** pp, string placa, bool* alterou, no_ * no){
     noArvAVL * p = *pp;
     if(!p){
         *pp = criarNovoNo(no);
@@ -568,7 +439,7 @@ void inserirAVL(noArvAVL ** pp, string placa, bool* alterou, no_ * no){
             *alterou = false;
         else
             if(placa <= p->placa) {
-                inserirAVL(&(p->esquerda), placa, alterou, no);
+                inserir_arv_avl(&(p->esquerda), placa, alterou, no);
                 if(*alterou)
                     switch (p->bal) {
                         case 1 :
@@ -584,7 +455,7 @@ void inserirAVL(noArvAVL ** pp, string placa, bool* alterou, no_ * no){
                             break;
             }
         } else {
-                    inserirAVL(&(p->direita), placa, alterou, no);
+                    inserir_arv_avl(&(p->direita), placa, alterou, no);
                     if(*alterou)
                         switch (p->bal) {
                             case -1:
@@ -604,136 +475,37 @@ void inserirAVL(noArvAVL ** pp, string placa, bool* alterou, no_ * no){
 }
 
 /**
- * Função desenvolvida como auxiliar da função excluirChave, procura a maior placa menor que a placa que será excluida.
- * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c 
- */ 
-noArvAVL * maiorAEsquerda(noArvAVL *p, noArvAVL **ant){
-    *ant = p;
-    p = p->esquerda;
-    while (p->direita) {
-        *ant = p;
-        p = p->direita;
+ * Insere um novo nó na árvore binária
+ * @param folha a primeira folha da árvore binária de onde será inserido o novo nó
+ * @param no o nó que a struct da folha irá apontar
+ * @return 1 caso seja possível realizar a inserção
+ * @return 0 caso não seja possível realizar a inserção
+*/
+int inserir_arv_binaria(noArv * folha, no_ * no) {
+    if (folha->placa == no->carro->placa) {
+        return 0;
     }
-    return(p);
+
+    if (folha->placa > no->carro->placa) {
+        if (!folha->esquerda) {
+            folha->esquerda = criarNovoNo_(no);
+            return 1;
+        }
+
+        return inserir_arv_binaria(folha->esquerda, no);
+    }
+
+    if (folha->placa < no->carro->placa) {
+        if (!folha->direita) {
+            folha->direita = criarNovoNo_(no);
+            return 1;
+        }
+
+        return inserir_arv_binaria(folha->direita, no);
+    }
+
+    return 0;
 }
- 
-/**
- * Exclui um nó da árvore AVL
- * @param raiz o ponteiro que aponta para o ponteiro que aponta para a raiz da árvore
- * @param placa a placa do veículo que será excluido da árvore
- * @param alterou 
- * @param no o nó da lista principal ao qual o nó da folha está se referindo
- * @returns true para casp tenha sido possível realizar a remoção 
- * @returns false para caso não tenha sido possível realizar a remoção
- * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
-*/
-bool excluirAVL(noArvAVL ** raiz, string placa, bool* alterou){
-    noArvAVL * atual = *raiz;
-    if (!atual) {
-        *alterou = false;
-        return false;
-    }
-
-    if (atual->placa == placa){
-        noArvAVL * substituto, *pai_substituto;
-        if (!atual->esquerda || !atual->direita) { // tem zero ou um filho
-            if (atual->esquerda)
-                substituto = atual->esquerda;
-            else 
-                substituto = atual->direita;
-            *raiz = substituto;
-            delete atual;
-            *alterou = true;
-            return true;
-        }
-        else {
-            cout << "entro aqui" << endl;   // tem dois filhos
-            substituto = maiorAEsquerda(atual->direita,&pai_substituto);
-            atual->placa = substituto->placa;
-            atual->no = substituto->no;
-            placa = substituto->placa; // continua o codigo excluindo o substituto
-        }
-    }
-
-    bool res;
-
-    if (placa > atual->placa) {
-        res = excluirAVL(&(atual->direita), placa, alterou);
-        if (*alterou) {
-            switch (atual->bal) {
-                case 1:
-                    atual->bal = 0;
-                    return true;
-                case 0:
-                    atual->bal = -1;
-                    *alterou = false;
-                    return true;
-                case -1:
-                    *raiz = rotacaoL(atual);
-                    if (atual->bal != 0)
-                        *alterou = false;
-                    return true;
-            }
-        }
-    } else {
-        res = excluirAVL(&(atual->esquerda), placa, alterou);
-        if (*alterou){
-            switch (atual->bal){
-                case -1:
-                    atual->bal = 0;
-                    return true;
-                case 0:
-                    atual->bal = 1;
-                    *alterou = false;
-                    return true;
-                case 1:
-                    *raiz = rotacaoR(atual);
-                    if (atual->bal != 0)
-                        *alterou = false;
-                    return true;
-            }
-        }
-    }
-    return res;
-}
-/**
- * BUG - NAO CONSEGUE EXCLUIR DA ARVORE AVL POR ALGUM MOTIVO
- * DESCONHECIDO DO ALEM
- * PROVAVELMENTE VAI TER QUE TROCAR TODO O CÓDIGO DA ARVORE
- * AVL :(
-*/
-
-/**
- * Realiza a rotação L2
- * @param o ponteiro de onde será realizada a rotação L2
- * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
-*/
-void rotacaoL2(noArvAVL **p) {
-    noArvAVL *u, *v;
-    u = (*p)->esquerda;
-    if (u->bal == -1) { // LL
-        (*p)->esquerda = u->direita;
-        u->direita = *p;
-        (*p)->bal = 0;
-        *p = u;
-    } else { // LR
-        v = u->direita;
-        u->direita = v->esquerda;
-        v->esquerda = u;
-        (*p)->esquerda = v->direita;
-        v->direita = *p;
-        if (v->bal == -1)
-            (*p)->bal = 1;
-        else 
-            (*p)->bal = 0;
-        if (v->bal == 1)
-            u->bal = -1;
-        else 
-            u->bal = 0;
-        *p = v;
-        }
-        (*p)->bal = 0; // balanço final da raiz (p) da subarvore
-    }
 
 /**
  * Insere um veículo na listaPrincipal, na árvore binária AVL e na arvore binária de busca simultâneamente
@@ -779,9 +551,178 @@ int inserir_veiculo(cabecalho * listaPrincipal, arvore * arvores, veiculo * carr
             novaFolha->placa = carro->placa;
             novaFolha->no = novoNo;
         } else {
-            inserirAVL(&arvores->arvore_avl, carro->placa, &alterou, novoNo);
+            inserir_arv_avl(&arvores->arvore_avl, carro->placa, &alterou, novoNo);
         }
     }
+
+    return 1;
+}
+
+/**
+ * Função desenvolvida como auxiliar da função excluirChave, procura a maior placa menor que a placa que será excluida.
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c 
+ */ 
+noArvAVL * maiorAEsquerda(noArvAVL *p, noArvAVL **ant){
+    *ant = p;
+    p = p->esquerda;
+    while (p->direita) {
+        *ant = p;
+        p = p->direita;
+    }
+    return(p);
+}
+ 
+/**
+ * Exclui um nó da árvore AVL
+ * @param raiz o ponteiro que aponta para o ponteiro que aponta para a raiz da árvore
+ * @param placa a placa do veículo que será excluido da árvore
+ * @param alterou 
+ * @param no o nó da lista principal ao qual o nó da folha está se referindo
+ * @returns true para casp tenha sido possível realizar a remoção 
+ * @returns false para caso não tenha sido possível realizar a remoção
+ * @authors http://www.each.usp.br/digiampietri/ACH2023/javaec/ArvoreAVL/arvoreAVL.c
+*/
+int excluir_arv_avl(noArvAVL ** raiz, string placa, bool* alterou){
+    noArvAVL * atual = *raiz;
+    if (!atual) {
+        *alterou = false;
+        return 0;
+    }
+
+    if (atual->placa == placa){
+        noArvAVL * substituto, *pai_substituto;
+        if (!atual->esquerda || !atual->direita) { // tem zero ou um filho
+            if (atual->esquerda)
+                substituto = atual->esquerda;
+            else 
+                substituto = atual->direita;
+            *raiz = substituto;
+            delete atual;
+            *alterou = true;
+            return 1;
+        }
+        else {
+            substituto = maiorAEsquerda(atual->direita,&pai_substituto);
+            atual->placa = substituto->placa;
+            atual->no = substituto->no;
+            placa = substituto->placa; // continua o codigo excluindo o substituto
+        }
+    }
+
+    int res;
+
+    if (placa > atual->placa) {
+        res = excluir_arv_avl(&(atual->direita), placa, alterou);
+        if (*alterou) {
+            switch (atual->bal) {
+                case 1:
+                    atual->bal = 0;
+                    return 1;
+                case 0:
+                    atual->bal = -1;
+                    *alterou = false;
+                    return 1;
+                case -1:
+                    *raiz = rotacaoL(atual);
+                    if (atual->bal != 0)
+                        *alterou = false;
+                    return 1;
+            }
+        }
+    } else {
+        res = excluir_arv_avl(&(atual->esquerda), placa, alterou);
+        if (*alterou){
+            switch (atual->bal){
+                case -1:
+                    atual->bal = 0;
+                    return 1;
+                case 0:
+                    atual->bal = 1;
+                    *alterou = false;
+                    return 1;
+                case 1:
+                    *raiz = rotacaoR(atual);
+                    if (atual->bal != 0)
+                        *alterou = false;
+                    return 1;
+            }
+        }
+    }
+    return res;
+}
+
+/**
+ * Remove um nó da árvore binária
+ * @param cabeca O endereço do primeiro ponteiro que aponta para o primeiro nó da árvore
+ * @param placa A placa a ser procurada na árvore binária
+ * @returns 1 caso seja possível realizar a remoção
+ * @returns 0 caso não seja possível realizar a remoção
+*/
+int remover_arv_binaria(noArv ** cabeca, string placa) {
+    
+    noArv ** pontExcluir = encontrar_no(cabeca, placa);
+
+    if (!pontExcluir) { /* Caso pontExcluir == NULL, então quer dizer que não foi encontrado */
+        return 0;
+    }
+    
+    noArv * noExcluir = *&*pontExcluir;
+
+    if (!noExcluir->esquerda && !noExcluir->direita) { /* Caso noExcluir seja o último da árvore */
+        *pontExcluir = NULL;
+        delete noExcluir;
+        return 1;
+    }
+
+    if (!noExcluir->esquerda && noExcluir->direita) {
+        *pontExcluir = noExcluir->direita;
+        delete noExcluir;
+        return 1;
+    }
+
+    noArv * tmp = noExcluir->esquerda;
+    noArv * tmp_pai = noExcluir;
+
+    while(tmp->direita) {
+        tmp_pai = tmp;
+        tmp = tmp->direita;
+    }
+
+    tmp->direita = noExcluir->direita;
+    tmp->esquerda = noExcluir->esquerda;
+    tmp_pai->direita = NULL;
+    *pontExcluir = tmp;
+
+
+    return 1;
+}
+
+/**
+ * Remove um veículo da lista principal, da árvore AVL e da árvore binária simultâneamente
+ * @param listaPrincipal a ListaPrincipal de onde será removido o vepiculo
+ * @param avl a árvore binária AVL de onde será removido o veículo
+ * @param binaria a árvore binária de busca de onde será removido o veículo
+ * @param placa a placa do veículo que será removido das estruturas
+ * @returns 1 caso seja possível realizar a remoção
+ * @returns 0 caso não seja possível realizar a remoção
+*/
+int remover_veiculo(cabecalho * listaPrincipal, string placa) {
+    no_ * atual = listaPrincipal->primeiro;
+    no_ * anterior = NULL;
+
+    while (atual && atual->carro->placa != placa) {
+        anterior = atual;
+        atual = atual->proximo;
+    }
+
+    if (!anterior) {
+        listaPrincipal->primeiro = atual->proximo;
+    } else {
+        anterior->proximo = atual->proximo;
+    }
+
+    delete atual->carro;
+    delete atual;
 
     return 1;
 }
@@ -806,12 +747,39 @@ string menu_opcoes(void) {
     return option;
 }
 
+/**
+ * Torna todas as letras da string em maiúsculas
+ * @param info A string que será colocada modificada
+ * @return A string com todas as letras maiúsculas
+*/
+string all_upper(string info){
+    for(int i = 0; i < info.length(); i++){
+        info[i] = toupper(info[i]);
+    }
+
+    return info;
+}
+
+
+/**
+ * Realiza uma consulta na lista principal, depois mostra as opções de exclusão e informações
+ * @param listaPrincipal a lista principal
+ * @param arvores o cabeçalho das arvores
+ * @param alterou variavel auxiliar para o balanceamento da arvore AVL
+*/
 void consulta(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
 
     string placa;
 
+    if(!listaPrincipal->primeiro) {
+        cout << "\033[31mImpossível realizar uma consulta. O banco de dados está vazio." << endl;
+        return;
+    }
+
     cout << "\033[1mDigite a placa que você deseja consultar =>\033[0m ";
     cin >> placa;
+
+    placa = all_upper(placa);
 
     no_ * atual = listaPrincipal->primeiro;
 
@@ -828,7 +796,7 @@ void consulta(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
     }
 
     if(!atual) {
-        cout << "Não foi encontrado nenhum carro com essa placa. Por favor, tente novamente." << endl;
+        cout << "\033[31mNão foi encontrado nenhum carro com essa placa. Por favor, tente novamente.\033[0m";
         return;
     }
 
@@ -839,7 +807,7 @@ void consulta(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
                 
     while(toupper(option[0]) != 'I' && toupper(option[0]) != 'E' && toupper(option[0]) != 'V'){
         cout << "\033[31mOpçao invalida. Por favor, tente novamente.\033[0m" << endl;
-        cout << "\033[1mO que você deseja fazer com o veículo encontrado?\033[0m (I)nformações, (R)emover, (V)oltar =>";
+        cout << "\033[1mO que você deseja fazer com o veículo encontrado?\033[0m (I)nformações, (R)emover, (V)oltar => ";
         cin >> option;
     }
 
@@ -847,7 +815,7 @@ void consulta(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
         return;
 
     if(toupper(option[0]) == 'I') {
-        cout << "\033[1m+---------+-------------------+------------+---------+------+--------+-----+----------+------------+------------+----------+----+--------+" << endl;
+        cout << "+---------+-------------------+------------+---------+------+--------+-----+----------+------------+------------+----------+----+--------+" << endl;
         cout << "|  PLACA  |      MODELO       |    MARCA   |   TIPO  | ANO  |   KM   | POT |   COMB   |   CAMBIO   |   DIREÇAO  |    COR   | PT | PREÇO  |" << endl;
         cout << "+---------+-------------------+------------+---------+------+--------+-----+----------+------------+------------+----------+----+--------+" << endl;
         cout << "| " << setw(6) << atual->carro->placa;
@@ -869,7 +837,7 @@ void consulta(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
 
     if(toupper(option[0]) == 'E') {
         if(remover_veiculo(listaPrincipal, placa)) {
-            excluirAVL(&arvores->arvore_avl, placa, alterou);
+            excluir_arv_avl(&arvores->arvore_avl, placa, alterou);
             remover_arv_binaria(&arvores->arvore_binaria, placa);
             cout << "\033[32mVeículo deletado com sucesso no banco de dados!\033[0m" << endl;
         };
@@ -943,19 +911,6 @@ int sao_chars(string info){
 }
 
 /**
- * Torna todas as letras da string em maiúsculas
- * @param info A string que será colocada modificada
- * @return A string com todas as letras maiúsculas
-*/
-string all_upper(string info){
-    for(int i = 0; i < info.length(); i++){
-        info[i] = toupper(info[i]);
-    }
-
-    return info;
-}
-
-/**
  * Coloca apenas a primeira letra da string em letra maiúsculas, o resto ficará em letras minusculas
  * @param info A string que será modificada
  * @return A string com a primeira letra maiúscula, e as restantes minusculas
@@ -994,9 +949,10 @@ void novo_carro(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
     cout << "\033[1mPlaca (AAA0000): \033[0m";
     cin >> stringInput;
 
-    if(stringInput == "!sair"){
+    if(stringInput == "!sair")
         return;
-    }
+
+    stringInput = all_upper(stringInput);
 
     bool existe = busca(listaPrincipal, stringInput);
     bool valido = e_placa(stringInput);
@@ -1010,6 +966,7 @@ void novo_carro(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
 
         cout << "\033[1mPlaca (AAA0000): \033[0m";
         cin >> stringInput;
+        stringInput = all_upper(stringInput);
         existe = busca(listaPrincipal, stringInput);
         valido = e_placa(stringInput);
     }
@@ -1125,7 +1082,7 @@ void novo_carro(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
     if(stringInput == "!sair")
         return;
 
-    switch (stringInput[0]) {
+    switch (toupper(stringInput[0])) {
         case 'D':
             carro->combustivel = "Diesel";
             break;
@@ -1155,7 +1112,7 @@ void novo_carro(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
     if(stringInput == "!sair")
         return;
 
-    switch (stringInput[0]) {
+    switch (toupper(stringInput[0])) {
         case 'A':
             carro->cambio = "Automatico";
             break;
@@ -1180,7 +1137,7 @@ void novo_carro(cabecalho * listaPrincipal, arvore * arvores, bool * alterou) {
     if(stringInput == "!sair")
         return;
 
-    switch (stringInput[0]) {
+    switch (toupper(stringInput[0])) {
         case 'H':
             carro->direcao = "Hidraulica";
             break;
@@ -1306,11 +1263,23 @@ int main(void) {
             "_  __ _ \n  / __/ _ \\| '_ \\ / __/ _ \\/ __/ __| |/ _ \\| '_ \\ / "
             "_` | '__| |/ _` |\n | (_| (_) | | | | (_|  __/\\__ \\__ \\ | (_) | "
             "| | | (_| | |  | | (_| |\n  \\___\\___/|_| "
-            "|_|\\___\\___||___/___/_|\\___/|_| |_|\\__,_|_|  |_|\\__,_|\n";
+            "|_|\\___\\___||___/___/_|\\___/|_| |_|\\__,_|_|  |_|\\__,_|\n\n";
 
     ifstream bancoDeDados("DB_Veiculos");
     cabecalho * listaPrincipal = inicia_lista();
     arvore * arvores = inicia_arvore();
+
+    if(listaPrincipal && arvores) 
+        cout << "\033[32mAs listas e arvores foram alocadas com sucesso.\033[0m\n" << endl;
+    else {
+        cout << "\033[31mAs listas e arvores não foram alocadas com sucesso.\033[0m]" << endl;
+        cout << "\033[31mFinalizando programa...\033[0m]" << endl;
+        return EXIT_FAILURE;
+    }
+
+    cout << "\033[33;1mFiltro da árvore binária: \033[0m Carros datados antes ou de 2016\n"
+            "\033[33;1mFiltro da árvore AVL: \033[0m     Carros datados depois de 2016\n";
+
     bool alterou = false;
 
     if (bancoDeDados.is_open()) {
@@ -1361,5 +1330,6 @@ int main(void) {
     desalocar_arv_avl(arvores->arvore_avl);
     desalocar_lp(listaPrincipal->primeiro);
 
-    cout << "Todas as estruturas foram desalocadas com sucesso!" << endl;
+    cout << "\033[32mTodas as estruturas foram desalocadas com sucesso!\033[0m" << endl;
+    return EXIT_SUCCESS;
 }
